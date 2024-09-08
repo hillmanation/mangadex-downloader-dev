@@ -55,8 +55,8 @@ def check_proxy(proxy_address=None):
             ['curl', 'http://checkip.amazonaws.com/', '--max-time', '10'],
             capture_output=True, text=True, check=True
         )
-        log.debug(f"PROXY CHECK: Current public IP address: {public_ip}")
-        print(f"PROXY CHECK: Current public IP address: {public_ip}")
+        log.debug(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
+        print(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
         # Compare that to the proxied address
         proxy_ip = subprocess.run(
             ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '10'],
@@ -65,7 +65,7 @@ def check_proxy(proxy_address=None):
         log.debug(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
         print(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
         # Compare the results
-        if public_ip == proxy_ip:
+        if public_ip.stdout == proxy_ip.stdout:
             log.debug(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
                       f"saved in '--proxy-env' PATH")
             print(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
