@@ -28,6 +28,6 @@ EXPOSE 9050
 WORKDIR /downloads
 
 # Start Tor in the background, wait for it to initialize exit nodes, and then run the downloader
-ENTRYPOINT [ "mangadex-downloader --proxy socks5://127.0.0.1:9050" ]
+ENTRYPOINT [ "mangadex-downloader" ]
 
 CMD [ "--help" ]
