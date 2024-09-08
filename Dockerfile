@@ -26,6 +26,6 @@ EXPOSE 9050
 WORKDIR /downloads
 
 # Start Tor in the background and then run the downloader
-ENTRYPOINT [ "sh", "-c", "tor & mangadex-downloader" ]
+ENTRYPOINT [ "sh", "-c", "tor & sleep 2 && mangadex-downloader" ]
 
 CMD [ "--help" ]
