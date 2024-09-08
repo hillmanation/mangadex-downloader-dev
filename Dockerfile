@@ -25,7 +25,8 @@ EXPOSE 9050
 
 WORKDIR /downloads
 
-# Start Tor in the background and then run the downloader
-ENTRYPOINT [ "sh", "-c", "tor & sleep 5 && mangadex-downloader" ]
+# Start Tor in the background, wait for it to initialize exit nodes, and then run the downloader
+ENTRYPOINT ["sh", "-c", "tor & while ! grep 'Bootstrapped 100%' /var/log/tor/log; do sleep 1; done; mangadex-downloader \"$@\""]
+
 
 CMD [ "--help" ]
