@@ -28,12 +28,6 @@ EXPOSE 9050
 WORKDIR /downloads
 
 # Start Tor in the background, wait for it to initialize exit nodes, and then run the downloader
-ENTRYPOINT ["/bin/sh", "-c", "tor & \
-    while ! netstat -ntl | grep 127.0.0.1:9050; do \
-        echo 'Waiting for Tor SOCKS proxy to be available...'; \
-        sleep 1; \
-    done; \
-    echo 'Tor SOCKS proxy is available. Starting manga downloader...'; \
-    mangadex-downloader \"$@\""]
+ENTRYPOINT [ "torsocks mangadex-downloader" ]
 
 CMD [ "--help" ]
