@@ -28,6 +28,6 @@ EXPOSE 9050
 WORKDIR /downloads
 
 # Start Tor in the background, wait for it to initialize exit nodes, and then run the downloader
-ENTRYPOINT [ "torsocks mangadex-downloader" ]
+ENTRYPOINT [ "tor &" ]
 
 CMD [ "--help" ]
