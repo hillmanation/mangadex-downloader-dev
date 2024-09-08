@@ -29,7 +29,7 @@ WORKDIR /downloads
 
 # Start Tor in the background, wait for it to initialize exit nodes, and then run the downloader
 ENTRYPOINT ["/bin/sh", "-c", "tor & \
-    while ! netcat -z 127.0.0.1 9050; do \
+    while ! netstat -ntl | grep 127.0.0.1:9050; do \
         echo 'Waiting for Tor SOCKS proxy to be available...'; \
         sleep 1; \
     done; \
