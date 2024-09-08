@@ -1,12 +1,10 @@
-# Use Python 3.11 base image
 FROM python:3.11
 
-# Copy the application code into the container
 COPY . /app
 WORKDIR /app
 
-# Setup Rust environment
-RUN apt update && apt install -y wget
+# Setup rust
+RUN apt update && apt install wget
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
     PATH=/usr/local/cargo/bin:$PATH \
@@ -14,36 +12,17 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 RUN wget https://sh.rustup.rs -O rustup.sh
 RUN chmod +x ./rustup.sh
 RUN ./rustup.sh -y --no-modify-path --profile minimal --default-toolchain $RUST_VERSION
-RUN chmod -R a+w $RUSTUP_HOME $CARGO_HOME
-RUN rustup --version
-RUN cargo --version
-RUN rustc --version
+RUN chmod -R a+w $RUSTUP_HOME $CARGO_HOME;
+RUN rustup --version; 
+RUN cargo --version;
+RUN rustc --version;
 
-# Install dependencies for mangadex-downloader, Tor, and Torsocks
-RUN apt update && apt install -y \
-    tor \
-    torsocks \
-    libjpeg-dev \
-    zlib1g-dev \
-    libfreetype6-dev \
-    build-essential \
-    python3-dev
-
-# Configure Tor (open SOCKS proxy on port 9050)
-RUN echo "SocksPort 0.0.0.0:9050" >> /etc/tor/torrc
-
-# Install mangadex-downloader with optional dependencies
+# Install mangadex-downloader
 RUN pip install --upgrade pip
 RUN pip install .[optional]
 
-# Expose the Tor SOCKS port
-EXPOSE 9050
-
-# Set working directory for downloads
 WORKDIR /downloads
 
-# Start Tor in the background and run mangadex-downloader
-ENTRYPOINT [ "sh", "-c", "tor & mangadex-downloader" ]
+ENTRYPOINT [ "mangadex-downloader" ]
 
-# Default command to display help
 CMD [ "--help" ]

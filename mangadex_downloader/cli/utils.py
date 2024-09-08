@@ -23,6 +23,7 @@
 import logging
 import signal
 import sys
+import subprocess
 
 from .. import __version__, __repository__, __url_repository__
 from ..update import architecture, executable
@@ -47,6 +48,35 @@ def setup_logging(name_module, verbose=False):
         log.setLevel(logging.INFO)
     return log
 
+def check_proxy(proxy_address=None):
+    try:
+        # Pull our public IP first
+        public_ip = subprocess.run(
+            ['curl', 'http://checkip.amazonaws.com/', '--max-time', '10'],
+            capture_output=True, text=True, check=True
+        )
+        log.debug(f"PROXY CHECk: Current public IP address: {public_ip}")
+        print(f"PROXY CHECk: Current public IP address: {public_ip}")
+        # Compare that to the proxied address
+        proxy_ip = subprocess.run(
+            ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '10'],
+            capture_output=True, text=True, check=True
+        )
+        log.debug(f"PROXY CHECK: Current proxied IP address: {proxy_ip}")
+        print(f"PROXY CHECK: Current proxied IP address: {proxy_ip}")
+        # Compare the results
+        if public_ip == proxy_ip:
+            log.debug(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
+                      f"saved in '--proxy-env' PATH")
+            print(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
+                      f"saved in '--proxy-env' PATH")
+        else:
+            log.debug(f"PROXY CHECK: SUCCESS! Public IP successsfully masked as {proxy_ip}")
+            print(f"PROXY CHECK: SUCCESS! Public IP successsfully masked as {proxy_ip}")
+    except subprocess.CalledProcessError as e:
+        log.debug(f"Error checking proxy: {e}")
+        print(f"Error checking proxy: {e}")
+
 def setup_proxy(proxy=None, from_env=False):
     if proxy and from_env:
         raise MangaDexException("--proxy and --proxy-env cannot be together")
@@ -56,6 +86,9 @@ def setup_proxy(proxy=None, from_env=False):
 
     if proxy:
         log.debug('Setting up proxy from --proxy option')
+        # Let's make sure the proxy is working before continuing
+        check_proxy(proxy)
+
         Net.set_proxy(proxy)
 
 def setup_network(args):
