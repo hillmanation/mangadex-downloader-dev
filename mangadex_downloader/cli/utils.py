@@ -55,27 +55,30 @@ def check_proxy(proxy_address=None):
             ['curl', 'http://checkip.amazonaws.com/', '--max-time', '10'],
             capture_output=True, text=True, check=True
         )
-        log.debug(f"PROXY CHECk: Current public IP address: {public_ip}")
-        print(f"PROXY CHECk: Current public IP address: {public_ip}")
+        log.debug(f"PROXY CHECK: Current public IP address: {public_ip}")
+        print(f"PROXY CHECK: Current public IP address: {public_ip}")
         # Compare that to the proxied address
         proxy_ip = subprocess.run(
             ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '10'],
             capture_output=True, text=True, check=True
         )
-        log.debug(f"PROXY CHECK: Current proxied IP address: {proxy_ip}")
-        print(f"PROXY CHECK: Current proxied IP address: {proxy_ip}")
+        log.debug(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
+        print(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
         # Compare the results
         if public_ip == proxy_ip:
             log.debug(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
                       f"saved in '--proxy-env' PATH")
             print(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
                       f"saved in '--proxy-env' PATH")
+            return False
         else:
-            log.debug(f"PROXY CHECK: SUCCESS! Public IP successsfully masked as {proxy_ip}")
-            print(f"PROXY CHECK: SUCCESS! Public IP successsfully masked as {proxy_ip}")
+            log.debug(f"PROXY CHECK: SUCCESS! Public IP successfully masked as {proxy_ip.stdout}")
+            print(f"PROXY CHECK: SUCCESS! Public IP successfully masked as {proxy_ip.stdout}")
+            return True
     except subprocess.CalledProcessError as e:
         log.debug(f"Error checking proxy: {e}")
         print(f"Error checking proxy: {e}")
+        return False
 
 def setup_proxy(proxy=None, from_env=False):
     if proxy and from_env:
@@ -87,9 +90,15 @@ def setup_proxy(proxy=None, from_env=False):
     if proxy:
         log.debug('Setting up proxy from --proxy option')
         # Let's make sure the proxy is working before continuing
-        check_proxy(proxy)
-
-        Net.set_proxy(proxy)
+        if check_proxy(proxy):
+            # Proxy is verified so let's continue to set it and move on
+            Net.set_proxy(proxy)
+        else:
+            # It's probably best to warn the user and exit here if the proxy isn't working
+            log.info(f"Proxy could not be verified, please verify the proxy settings and try again.")
+            log.debug(f"Provided proxy source {proxy} returned unmasked public IP - see debug proxy logs")
+            print(f"Unable to verify proxy settings, exiting...")
+            sys.exit(0)
 
 def setup_network(args):
     # Build proxy
@@ -130,7 +139,7 @@ def register_keyboardinterrupt_handler():
 
 def close_network_object():
     log.info("Cleaning up...")
-    log.debug("Closing netwok object")
+    log.debug("Closing network object")
     Net.close()
 
 class IteratorEmpty(Exception):
