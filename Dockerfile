@@ -18,7 +18,7 @@ RUN pip install --upgrade pip
 RUN pip install .
 
 # Configure Tor (opens SOCKS proxy on port 9050)
-RUN echo "SocksPort 0.0.0.0:9050" >> /etc/tor/torrc
+RUN echo "SocksPort 127.0.0.1:9050" >> /etc/tor/torrc
 
 # Expose the Tor SOCKS port
 EXPOSE 9050
@@ -26,6 +26,6 @@ EXPOSE 9050
 WORKDIR /downloads
 
 # Start Tor in the background and then run the downloader
-ENTRYPOINT [ "sh", "-c", "tor & sleep 2 && mangadex-downloader" ]
+ENTRYPOINT [ "sh", "-c", "tor & sleep 5 && mangadex-downloader" ]
 
 CMD [ "--help" ]
