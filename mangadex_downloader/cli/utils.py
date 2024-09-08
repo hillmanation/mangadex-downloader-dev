@@ -55,29 +55,23 @@ def check_proxy(proxy_address=None):
             ['curl', 'http://checkip.amazonaws.com/', '--max-time', '10'],
             capture_output=True, text=True, check=True
         )
-        log.debug(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
-        print(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
+        log.info(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
         # Compare that to the proxied address
         proxy_ip = subprocess.run(
             ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '10'],
             capture_output=True, text=True, check=True
         )
-        log.debug(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
-        print(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
+        log.info(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
         # Compare the results
         if public_ip.stdout == proxy_ip.stdout:
-            log.debug(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
-                      f"saved in '--proxy-env' PATH")
-            print(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
+            log.info(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
                       f"saved in '--proxy-env' PATH")
             return False
         else:
-            log.debug(f"PROXY CHECK: SUCCESS! Public IP successfully masked as {proxy_ip.stdout}")
-            print(f"PROXY CHECK: SUCCESS! Public IP successfully masked as {proxy_ip.stdout}")
+            log.info(f"PROXY CHECK: SUCCESS! Public IP successfully masked as {proxy_ip.stdout}")
             return True
     except subprocess.CalledProcessError as e:
-        log.debug(f"Error checking proxy: {e}")
-        print(f"Error checking proxy: {e}")
+        log.error(f"Error checking proxy: {e}")
         return False
 
 def setup_proxy(proxy=None, from_env=False):
@@ -95,9 +89,13 @@ def setup_proxy(proxy=None, from_env=False):
             Net.set_proxy(proxy)
         else:
             # It's probably best to warn the user and exit here if the proxy isn't working
-            log.info(f"Proxy could not be verified, please verify the proxy settings and try again.")
+            log.warning(f"Proxy could not be verified, please verify the proxy settings and try again.")
             log.debug(f"Provided proxy source {proxy} returned unmasked public IP - see debug proxy logs")
-            print(f"Unable to verify proxy settings, exiting...")
+            print("Cleaning up...")
+            # Just trying to be clean here, though if the above fails we'll not have started any jobs, this is a just in
+            # case, looking at the debug it seems like a download job is started in order to get here
+            for job in _cleanup_jobs:
+                job()
             sys.exit(0)
 
 def setup_network(args):
