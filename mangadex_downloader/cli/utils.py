@@ -52,20 +52,20 @@ def check_proxy(proxy_address=None):
     try:
         # Pull our public IP first
         public_ip = subprocess.run(
-            ['curl', 'http://checkip.amazonaws.com/', '--max-time', '10'],
+            ['curl', 'http://checkip.amazonaws.com/', '--max-time', '20'],
             capture_output=True, text=True, check=True
         )
         log.info(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
         # Compare that to the proxied address
         proxy_ip = subprocess.run(
-            ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '10'],
+            ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '20'],
             capture_output=True, text=True, check=True
         )
         log.info(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
         # Compare the results
         if public_ip.stdout == proxy_ip.stdout:
-            log.info(f"PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
-                      f"saved in '--proxy-env' PATH")
+            log.info("PROXY CHECK FAILED. There may be an issue with the proxy address passed to '--proxy' or "
+                     "saved in '--proxy-env' PATH")
             return False
         else:
             log.info(f"PROXY CHECK: SUCCESS! Public IP successfully masked as {proxy_ip.stdout}")
