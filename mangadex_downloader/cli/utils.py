@@ -23,6 +23,7 @@
 import logging
 import signal
 import sys
+import time
 import subprocess
 
 from .. import __version__, __repository__, __url_repository__
@@ -52,13 +53,14 @@ def check_proxy(proxy_address=None):
     try:
         # Pull our public IP first
         public_ip = subprocess.run(
-            ['curl', 'http://checkip.amazonaws.com/', '--max-time', '20'],
+            ['curl', 'http://checkip.amazonaws.com/'],
             capture_output=True, text=True, check=True
         )
         log.info(f"PROXY CHECK: Current public IP address: {public_ip.stdout}")
+        time.sleep(2)  # We may be querying amazonaws too quickly so let's pause here
         # Compare that to the proxied address
         proxy_ip = subprocess.run(
-            ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/', '--max-time', '20'],
+            ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/'],
             capture_output=True, text=True, check=True
         )
         log.info(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
