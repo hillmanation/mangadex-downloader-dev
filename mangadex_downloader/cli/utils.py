@@ -60,7 +60,7 @@ def check_proxy(proxy_address=None):
         time.sleep(2)  # We may be querying amazonaws too quickly so let's pause here
         # Compare that to the proxied address
         proxy_ip = subprocess.run(
-            ['curl', '--proxy', proxy_address, 'http://checkip.amazonaws.com/'],
+            ['curl', '--socks5', proxy_address.replace('socks5://', ''), 'http://checkip.amazonaws.com/'],
             capture_output=True, text=True, check=True
         )
         log.info(f"PROXY CHECK: Current proxied IP address: {proxy_ip.stdout}")
