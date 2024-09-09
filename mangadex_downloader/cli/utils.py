@@ -81,24 +81,21 @@ def setup_proxy(proxy=None, from_env=False):
         raise MangaDexException("--proxy and --proxy-env cannot be together")
 
     if from_env:
-        log.debug("Using proxy from environments")
+        log.info("Using proxy from environments")
 
     if proxy:
-        log.debug('Setting up proxy from --proxy option')
+        log.info('Setting up proxy from --proxy option')
         # Let's make sure the proxy is working before continuing
         if check_proxy(proxy):
             # Proxy is verified so let's continue to set it and move on
             Net.set_proxy(proxy)
         else:
             # It's probably best to warn the user and exit here if the proxy isn't working
-            log.warning(f"Proxy could not be verified, please verify the proxy settings and try again.")
-            log.debug(f"Provided proxy source {proxy} returned unmasked public IP - see debug proxy logs")
-            print("Cleaning up...")
-            # Just trying to be clean here, though if the above fails we'll not have started any jobs, this is a just in
-            # case, looking at the debug it seems like a download job is started in order to get here
-            for job in _cleanup_jobs:
-                job()
-            sys.exit(0)
+            log.warning(f"Proxy could not be verified, you may want to verify the proxy settings and try again, "
+                        f"the download jobs may not be properly running over your proxy.")
+            log.info(f"Provided proxy source {proxy} returned unmasked public IP - see debug proxy logs")
+            Net.set_proxy(proxy)
+
 
 def setup_network(args):
     # Build proxy
