@@ -440,7 +440,9 @@ class NetworkManager:
         """Return ``True`` if requests and MangaDex session from :class:`NetworkObject`
         are configured using proxy.
         """
-        return self.proxy is not None
+        if self.proxy is not None:
+            log.info(f"Proxy settings found: {self.proxy}")
+            return True
 
     def set_proxy(self, proxy):
         """Setup HTTP/SOCKS proxy for requests and MangaDex session"""
@@ -451,6 +453,7 @@ class NetworkManager:
             self._update_mangadex_proxy(proxy)
         if self._requests:
             self._update_requests_proxy(proxy)
+        log.debug(f"Proxy set to: {self.proxy}")  # Debug handling
 
     def clear_proxy(self):
         """Remove all proxy from requests and MangaDex session and disable environments proxy"""
@@ -462,6 +465,7 @@ class NetworkManager:
         if self._requests:
             self._requests.proxies.clear()
             self._requests.trust_env = False
+        log.debug(f"Removed all proxy settings.")
 
     def _update_mangadex_proxy(self, proxy):
         if self._mangadex:
@@ -471,6 +475,7 @@ class NetworkManager:
             }
             self._mangadex.proxies.update(pr)
             self._mangadex.trust_env = self._trust_env
+            log.debug(f"MangaDex proxy updated: {pr}")
 
     def _create_mangadex(self):
         if self._mangadex is None:
@@ -494,6 +499,7 @@ class NetworkManager:
             }
             self._requests.proxies.update(pr)
             self._requests.trust_env = self._trust_env
+            log.debug(f"Requests proxy updated: {pr}")
     
     def _create_requests(self):
         if self._requests is None:
