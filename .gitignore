@@ -6,3 +6,9 @@ docs/_build
 bugs.txt
 ideas.txt
 *.db
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/mangadex-downloader-tor.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
